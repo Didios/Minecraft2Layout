@@ -10,12 +10,22 @@ from tkinter.messagebox import showerror, showinfo, showwarning
 
 from PIL import Image, ImageDraw, ImageFont
 
-from os import path, makedirs
+import sys
+from os import path, makedirs, environ
 
 import python_nbt.nbt as nbt
 
 # region utils
 
+def resource_path(relative):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = path.abspath(".")
+
+    return path.join(base_path, relative)
 
 def get_nbt_data(filepath: str) -> tuple[list[int, int, int], list[dict[str: list[int, int, int] | int]], list[dict[str: dict | str]]]:
     """
@@ -67,13 +77,13 @@ def draw_square(img, x1, y1, x2, y2, color):
 
 class App:
     PATH_BLOCKS = 'assets/blocks'
-    PATH_FONTS = 'assets/fonts'
+    PATH_FONTS = 'assets/includes/fonts/MinecraftRegular.otf'
     PATH_PROPERTIES = 'assets/properties'
 
     def __init__(self):
         self.root = Tk()
         self.root.title('Minecraft2Layout')
-        self.root.iconbitmap('assets/icon.ico')
+        self.root.iconbitmap(resource_path('assets/includes/icon.ico'))
 
         self.textures = {}
         self.current_textures = []
@@ -359,7 +369,8 @@ class App:
 
         self.set_progress(10)
 
-        font = ImageFont.truetype(path.join(self.PATH_FONTS, 'MinecraftRegular.otf'), scale // 2)
+        font_path = self.PATH_FONTS
+        font = ImageFont.truetype(resource_path(font_path), scale // 2)
         legend_position = self.legend_position.get()
 
         # calculate image dimension
